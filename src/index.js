@@ -1,4 +1,7 @@
 'use strict'
+const multihash = require('multihashes')
+const Block = require('ipfs-block')
+const multihashing = require('multihashing-async')
 
 const WantManager = require('./want-manager')
 const Network = require('./network')
@@ -210,6 +213,7 @@ class Bitswap {
 
     for (const cid of cids) {
       const has = await this.blockstore.has(cid)
+      
       pendingStart--
       if (has) {
         if (!pendingStart) {
@@ -220,8 +224,24 @@ class Bitswap {
         continue
       }
 
+      /* MOD: Zippie fastpeer */
+      try {
+        let fastpeer = window.ipfs_fastpeer ? window.ipfs_fastpeer : 'https://global-ipfs-fp.dev.zippie.org'
+        let res = await fetch(fastpeer + '/api/v0/block/get/' + cid.toString(), {cache: 'force-cache'})
+        if (res.status === 200) {
+          let buf = Buffer.from(await res.arrayBuffer())
+          let m = multihash.decode(cid.multihash)
+          if (cid.multihash.equals(await multihashing(buf, m.code))) {
+            yield new Block(buf, cid)
+          }
+          console.info('data mismatch from fast peer fetching ' + cid.toString())
+        }
+      } catch (err) {
+      }
+
       if (!promptedNetwork) {
         promptedNetwork = true
+        // XXX Zippie: ?????? cids[0]
         this.network.findAndConnect(cids[0]).catch((err) => this._log.error(err))
       }
 
