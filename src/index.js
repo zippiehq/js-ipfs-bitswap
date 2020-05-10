@@ -228,6 +228,12 @@ class Bitswap {
       try {
         let fastpeer = window.ipfs_fastpeer ? window.ipfs_fastpeer : 'https://global-ipfs-fp.dev.zippie.org'
         let res = await fetch(fastpeer + '/api/v0/block/get/' + cid.toString(), {cache: 'force-cache'})
+        // it's likely we'll connect again soon
+        var hint = document.createElement("link");
+	hint.rel = "preconnect";
+	hint.href = window.ipfs_fastpeer
+        document.head.appendChild(hint)
+        document.head.removeChild(hint)
         if (res.status === 200) {
           let buf = Buffer.from(await res.arrayBuffer())
           let m = multihash.decode(cid.multihash)
