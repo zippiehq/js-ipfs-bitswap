@@ -231,7 +231,7 @@ class Bitswap {
         // it's likely we'll connect again soon
         var hint = document.createElement("link");
 	hint.rel = "preconnect";
-	hint.href = window.ipfs_fastpeer
+	hint.href = fastpeer
         document.head.appendChild(hint)
         document.head.removeChild(hint)
         if (res.status === 200) {
