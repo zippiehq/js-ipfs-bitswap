@@ -239,7 +239,7 @@ class Bitswap {
           let m = multihash.decode(cid.multihash)
           if (cid.multihash.equals(await multihashing(buf, m.code))) {
              let b = new Block(buf, cid)
-             this.blockstore.put(b)
+             await this.blockstore.put(b)
              yield b
           }
           console.info('data mismatch from fast peer fetching ' + cid.toString())
